@@ -30,6 +30,17 @@ const UserSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    googleEmail: {
+      type: String,
+      unique: true,
+      sparse: true,
+    },
+    linkToken: {
+      type: String,
+    },
+    linkTokenExpires: {
+      type: Date,
+    },
   },
   { timestamps: true }
 );

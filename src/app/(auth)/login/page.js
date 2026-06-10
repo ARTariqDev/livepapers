@@ -83,7 +83,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
+    if (!identifier || !password) {
       setError('Please fill in all fields');
       return;
     }
@@ -108,7 +108,7 @@ export default function LoginPage() {
       setError(res.error);
       setLoading(false);
     } else {
-      router.push('/');
+      router.push('/dashboard');
       router.refresh();
     }
   };
@@ -126,7 +126,7 @@ export default function LoginPage() {
       <div className="mb-6">
         <button
           type="button"
-          onClick={() => signIn('google')}
+          onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
           className="social-btn w-full flex items-center justify-center gap-2.5 px-4 py-3 rounded-lg border border-foreground/10 bg-background hover:border-foreground/30 hover:bg-foreground/[0.02] transition-all duration-300 text-sm font-medium group"
         >
           <svg className="w-4.5 h-4.5 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24">
