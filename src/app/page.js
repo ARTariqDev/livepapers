@@ -5,7 +5,7 @@ import Footer from './components/landingpage/Footer';
 
 export default function Home() {
   return (
-    //AI was messign up code so I split it into components
+    //AI was messing up code so I split it into components
     // makes it easier this way to manage code for me
     <main className="min-h-screen bg-background text-foreground selection:bg-foreground selection:text-background font-sans overflow-hidden">
       <Navbar />

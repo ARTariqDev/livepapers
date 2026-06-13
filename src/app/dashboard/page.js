@@ -1,72 +1,118 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import gsap from 'gsap';
+import { Draggable } from 'gsap/Draggable';
+import Image from 'next/image';
+import Icon from '../components/dashboard/Icon';
+import AppWindow from '../components/dashboard/AppWindow';
+
+gsap.registerPlugin(Draggable);
+
+const ICONS = [
+  { src: '/icons/papers.png', alt: 'Papers',    text: 'Past Papers', href: '/pastpapers' },
+  { src: '/icons/mcq.png',    alt: 'Live MCQs', text: 'Live MCQs',   href: '/live-mcqs' },
+  { src: '/icons/desmos.png', alt: 'Desmos',    text: 'Desmos',      href: 'https://www.desmos.com/calculator' },
+];
+
+const COLS = 3;
+const ROWS = 5;
+const PER_PAGE = COLS * ROWS;
+let nextId = 1;
 
 export default function DashboardPage() {
-  const { data: session, status } = useSession();
+  const { data: session, status, update } = useSession();
   const router = useRouter();
-  const containerRef = useRef(null);
-  const [showLinkedBanner, setShowLinkedBanner] = useState(false);
+  const gridRef = useRef(null);
+  const isAnimating = useRef(false);
+  const touchStart = useRef(null);
 
-  // Check for ?linked=true on mount and show the Google linked banner
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('linked') === 'true') {
-        setShowLinkedBanner(true);
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    }
-  }, []);
+  const [isMobile, setIsMobile] = useState(false);
+  const [page, setPage] = useState(0);
+  const [windows, setWindows] = useState([]);
+  const [minimized, setMinimized] = useState([]);
+  const [topZ, setTopZ] = useState(100);
+  const [showSwitcher, setShowSwitcher] = useState(false);
 
   useEffect(() => {
-    if (showLinkedBanner) {
-      gsap.fromTo(
-        '.linked-banner',
-        { y: -16, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.5, ease: 'power3.out' }
-      );
-    }
-  }, [showLinkedBanner]);
+    const onVisible = () => { if (document.visibilityState === 'visible') update(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [update]);
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/login');
-    }
+    if (status === 'unauthenticated') router.push('/login');
   }, [status, router]);
 
   useEffect(() => {
-    if (status === 'authenticated') {
-      const ctx = gsap.context(() => {
-        const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
-        tl.fromTo('.dash-header', 
-          { y: -20, opacity: 0 }, 
-          { y: 0, opacity: 1, duration: 0.6 }
-        );
-
-        tl.fromTo('.dash-card', 
-          { y: 25, opacity: 0 }, 
-          { y: 0, opacity: 1, duration: 0.5, stagger: 0.08 },
-          '-=0.3'
-        );
-
-        tl.fromTo('.dash-row',
-          { y: 15, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.4, stagger: 0.05 },
-          '-=0.2'
-        );
-      }, containerRef);
-
-      return () => ctx.revert();
+  useEffect(() => {
+    if (!isMobile && status === 'authenticated') {
+      gsap.fromTo('.dash-icon',
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.4, stagger: 0.05, ease: 'power3.out' }
+      );
     }
-  }, [status]);
+  }, [isMobile, status]);
 
-  if (status === 'loading') {
+  const openWindow = (icon) => {
+    const existing = windows.find(w => w.src === icon.href);
+    if (existing) {
+      setMinimized(prev => prev.filter(m => m !== existing.id));
+      focusWindow(existing.id);
+      return;
+    }
+    const id = nextId++;
+    const z = topZ + 1;
+    setTopZ(z);
+    setWindows(prev => [...prev, { id, title: icon.text, src: icon.href, iconSrc: icon.src, zIndex: z }]);
+  };
+
+  const closeWindow = (id) => {
+    setWindows(prev => prev.filter(w => w.id !== id));
+    setMinimized(prev => prev.filter(m => m !== id));
+  };
+
+  const minimizeWindow = (id) => setMinimized(prev => [...prev, id]);
+
+  const focusWindow = (id) => {
+    const z = topZ + 1;
+    setTopZ(z);
+    setWindows(prev => prev.map(w => w.id === id ? { ...w, zIndex: z } : w));
+  };
+
+  const restoreWindow = (id) => {
+    setMinimized(prev => prev.filter(m => m !== id));
+    focusWindow(id);
+    setShowSwitcher(false);
+  };
+
+  const goToPage = (next, dir) => {
+    if (isAnimating.current) return;
+    if (next < 0 || next >= Math.ceil(ICONS.length / PER_PAGE)) return;
+    isAnimating.current = true;
+    const el = gridRef.current;
+    gsap.to(el, {
+      x: dir * -120 + '%', opacity: 0, duration: 0.25, ease: 'power2.in',
+      onComplete: () => {
+        setPage(next);
+        gsap.fromTo(el,
+          { x: dir * 120 + '%', opacity: 0 },
+          { x: '0%', opacity: 1, duration: 0.3, ease: 'power2.out',
+            onComplete: () => { isAnimating.current = false; } }
+        );
+      }
+    });
+  };
+
+  if (status === 'loading' && !session) {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-foreground font-sans">
         <div className="flex flex-col items-center gap-4">
@@ -77,205 +123,137 @@ export default function DashboardPage() {
     );
   }
 
-  if (!session) {
-    return null;
-  }
+  if (!session) return null;
 
-  const mockPapers = [
-    { id: 1, title: 'AP Chemistry 2024 - MCQ Section', duration: '45 mins', difficulty: 'Medium', status: 'In Progress', progress: 60 },
-    { id: 2, title: 'AP Physics 1 2023 - Free Response', duration: '90 mins', difficulty: 'Hard', status: 'Not Started', progress: 0 },
-    { id: 3, title: 'IB Mathematics Analysis & Approaches HL 2024', duration: '120 mins', difficulty: 'Expert', status: 'Completed', score: '84%', progress: 100 },
-    { id: 4, title: 'SAT Practice Test 8 - Reading & Writing', duration: '64 mins', difficulty: 'Medium', status: 'Completed', score: '92%', progress: 100 },
-  ];
+  const pages = Math.ceil(ICONS.length / PER_PAGE);
+  const currentIcons = ICONS.slice(page * PER_PAGE, (page + 1) * PER_PAGE);
+  const visibleWindows = windows.filter(w => !minimized.includes(w.id));
+  const openSrcs = new Set(windows.map(w => w.src));
 
   return (
-    <div ref={containerRef} className="min-h-screen bg-background text-foreground font-sans flex flex-col">
-      {/* Top Navbar */}
-      <header className="border-b border-foreground/5 bg-background/50 backdrop-blur-xl sticky top-0 z-40 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-xl font-bold tracking-tight hover:opacity-85 transition-opacity">
-            LivePapers.
-          </Link>
-          <span className="text-xs bg-foreground/5 text-foreground/60 px-2 py-0.5 rounded-full font-medium border border-foreground/[0.03]">
-            Dashboard
-          </span>
-        </div>
-        
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 text-right hidden sm:flex">
-            <div>
-              <p className="text-sm font-semibold leading-none">{session.user.name}</p>
-              <p className="text-xs text-foreground/40 mt-1">{session.user.email}</p>
-            </div>
-            {session.user.image ? (
-              <img src={session.user.image} alt="Profile" className="w-9 h-9 rounded-full border border-foreground/10" />
-            ) : (
-              <div className="w-9 h-9 rounded-full bg-foreground/5 flex items-center justify-center border border-foreground/10 text-xs font-bold uppercase">
-                {session.user.name?.slice(0, 2)}
-              </div>
-            )}
-          </div>
-          <button
-            onClick={() => signOut({ callbackUrl: '/' })}
-            className="text-xs font-medium border border-foreground/10 hover:border-foreground/30 hover:bg-foreground/[0.02] px-3.5 py-2 rounded-lg transition-all duration-200 cursor-pointer animate-pulse-subtle"
-          >
-            Log out
-          </button>
-        </div>
-      </header>
+    <div className="h-screen bg-background text-foreground font-sans flex flex-col overflow-hidden">
 
-      {/* Google Linked Success Banner */}
-      {showLinkedBanner && (
-        <div className="linked-banner bg-emerald-500/[0.06] border-b border-emerald-500/15">
-          <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <svg className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
-              <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300">
-                <strong>Google account linked!</strong> You can now sign in with Google for secure, one-click login next time.
-              </p>
+
+      {isMobile ? (
+        <div
+          className="flex-1 flex flex-col overflow-hidden"
+          onTouchStart={e => { touchStart.current = e.touches[0].clientX; }}
+          onTouchEnd={e => {
+            if (touchStart.current === null) return;
+            const diff = touchStart.current - e.changedTouches[0].clientX;
+            if (diff > 50)  goToPage(page + 1,  1);
+            if (diff < -50) goToPage(page - 1, -1);
+            touchStart.current = null;
+          }}
+        >
+          <div className="flex-1 overflow-hidden relative">
+            <div ref={gridRef} className="grid grid-cols-3 content-start gap-y-6 gap-x-2 p-6 pt-10">
+              {currentIcons.map((icon, i) => (
+                <div key={i} className="flex justify-center">
+                  <Icon {...icon} onClick={() => openWindow(icon)} />
+                </div>
+              ))}
             </div>
-            <button
-              onClick={() => {
-                gsap.to('.linked-banner', { y: -16, opacity: 0, duration: 0.3, onComplete: () => setShowLinkedBanner(false) });
-              }}
-              className="flex-shrink-0 text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-200 transition-colors cursor-pointer"
-              aria-label="Dismiss"
-            >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+          </div>
+          {pages > 1 && (
+            <div className="flex justify-center gap-2 pb-4">
+              {Array.from({ length: pages }).map((_, i) => (
+                <button key={i} onClick={() => goToPage(i, i > page ? 1 : -1)}
+                  className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === page ? 'bg-foreground' : 'bg-foreground/20'}`}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex-1 overflow-x-auto overflow-y-hidden p-6">
+          <div style={{ height: 'calc(100vh - 80px)' }} className="flex flex-col flex-wrap content-start gap-y-4 gap-x-2">
+            {ICONS.map((icon, i) => (
+              <div key={i} className="dash-icon">
+                <Icon {...icon} onClick={() => openWindow(icon)} />
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Main Dashboard Area */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-10 space-y-10">
-        
-        {/* Header Hero Section */}
-        <section className="dash-header flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-6 border-b border-foreground/5">
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-              Welcome back, {session.user.name?.split(' ')[0]}!
-            </h1>
-            <p className="text-foreground/50 text-sm mt-1.5 leading-relaxed">
-              Track your exam metrics and continue where you left off.
-            </p>
-          </div>
-          
-          {/* User metadata tags */}
-          <div className="flex items-center gap-2.5 flex-wrap">
-            {session.user.username && (
-              <span className="text-xs font-medium bg-foreground/[0.02] border border-foreground/5 text-foreground/60 px-3 py-1.5 rounded-lg">
-                @{session.user.username}
-              </span>
-            )}
-            <span className="text-xs font-medium bg-emerald-500/[0.04] border border-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Active Account
-            </span>
-          </div>
-        </section>
 
-        {/* Stats Grid */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div className="dash-card p-6 rounded-2xl border border-foreground/5 bg-foreground/[0.01] hover:border-foreground/15 hover:bg-foreground/[0.02] transition-all duration-300">
-            <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">Mock Exams Completed</p>
-            <h3 className="text-4xl font-bold mt-3 tracking-tight">14</h3>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-              </svg>
-              <span>+3 this week</span>
-            </div>
-          </div>
-          
-          <div className="dash-card p-6 rounded-2xl border border-foreground/5 bg-foreground/[0.01] hover:border-foreground/15 hover:bg-foreground/[0.02] transition-all duration-300">
-            <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">Average Score</p>
-            <h3 className="text-4xl font-bold mt-3 tracking-tight">82.4%</h3>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
-              </svg>
-              <span>+1.8% vs last month</span>
-            </div>
-          </div>
+      {visibleWindows.map(w => (
+        <AppWindow
+          key={w.id}
+          {...w}
+          isMobile={isMobile}
+          onClose={closeWindow}
+          onMinimize={minimizeWindow}
+          onFocus={() => focusWindow(w.id)}
+          onShowSwitcher={() => setShowSwitcher(true)}
+        />
+      ))}
 
-          <div className="dash-card p-6 rounded-2xl border border-foreground/5 bg-foreground/[0.01] hover:border-foreground/15 hover:bg-foreground/[0.02] transition-all duration-300">
-            <p className="text-xs font-semibold text-foreground/40 uppercase tracking-wider">Practice Time</p>
-            <h3 className="text-4xl font-bold mt-3 tracking-tight">12.5 hrs</h3>
-            <div className="mt-4 flex items-center gap-1.5 text-xs text-foreground/40 font-medium">
-              <span>Goal: 15 hrs / month</span>
-            </div>
-          </div>
-        </section>
 
-        {/* Mock Past Papers Section */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold tracking-tight">Recommended Past Papers</h2>
-            <button className="text-xs font-semibold text-foreground/60 hover:text-foreground hover:underline underline-offset-4 transition-colors cursor-pointer">
-              Browse all papers →
-            </button>
-          </div>
+      {!isMobile && (
+        <div className="h-16 shrink-0 border-t border-foreground/5 bg-surface-dim flex items-center justify-between px-6">
 
-          <div className="border border-foreground/5 rounded-2xl overflow-hidden divide-y divide-foreground/5 bg-foreground/[0.005]">
-            {mockPapers.map((paper) => (
-              <div
-                key={paper.id}
-                className="dash-row p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 hover:bg-foreground/[0.01] transition-colors duration-200"
-              >
-                <div className="space-y-1 max-w-xl">
-                  <h4 className="text-sm font-semibold tracking-tight leading-tight">{paper.title}</h4>
-                  <div className="flex items-center gap-3 text-xs text-foreground/40">
-                    <span>{paper.duration}</span>
-                    <span>•</span>
-                    <span>{paper.difficulty}</span>
-                  </div>
-                </div>
+          {/*attribution */}
+          <p className="text-xs text-foreground/20">
+            © {new Date().getFullYear()} LivePapers ·{' '}
+            <a href="https://www.flaticon.com/free-icons/document" target="_blank" rel="noopener noreferrer" className="hover:text-foreground/40 transition-colors">
+              Icons by Freepik
+            </a>
+          </p>
 
-                <div className="flex items-center justify-between sm:justify-end gap-6 sm:text-right">
-                  {paper.status === 'Completed' ? (
-                    <div>
-                      <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-500/[0.05] border border-emerald-500/10 px-2.5 py-1 rounded-full">
-                        Score: {paper.score}
-                      </span>
-                    </div>
-                  ) : paper.status === 'In Progress' ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-20 bg-foreground/5 h-1.5 rounded-full overflow-hidden hidden xs:block">
-                        <div className="bg-foreground/50 h-full rounded-full" style={{ width: `${paper.progress}%` }} />
-                      </div>
-                      <span className="text-xs font-medium text-amber-600 dark:text-amber-400 bg-amber-500/[0.05] border border-amber-500/10 px-2.5 py-1 rounded-full">
-                        Resume ({paper.progress}%)
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-xs font-medium text-foreground/40 bg-foreground/5 border border-foreground/10 px-2.5 py-1 rounded-full">
-                      Not Started
-                    </span>
-                  )}
+    
+          <div className="flex items-end gap-1">
+            {ICONS.map((icon, i) => {
+              const isOpen = openSrcs.has(icon.href);
+              const win = windows.find(w => w.src === icon.href);
+              const isMinimized = win && minimized.includes(win.id);
 
-                  <button className="text-xs font-semibold bg-foreground text-background px-4 py-2 rounded-lg hover:bg-foreground/90 transition-colors shadow-sm cursor-pointer">
-                    {paper.status === 'Completed' ? 'Review Solutions' : paper.status === 'In Progress' ? 'Resume Exam' : 'Start Exam'}
+              return (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => openWindow(icon)}
+                    title={icon.text}
+                    className="w-10 h-10 rounded-xl bg-background border border-foreground/10 flex items-center justify-center hover:scale-110 transition-transform duration-150"
+                  >
+                    <Image src={icon.src} alt={icon.alt} width={28} height={28} className="object-contain dark:invert" />
+                    {isMinimized && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-foreground/40" />
+                    )}
                   </button>
+                  <span className={`w-1 h-1 rounded-full transition-colors ${isOpen ? 'bg-foreground/50' : 'bg-transparent'}`} />
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-        </section>
 
-      </main>
+          {/* Right: spacer to balance layout */}
+          <div className="w-32" />
+        </div>
+      )}
 
-      {/* Mini Footer */}
-      <footer className="border-t border-foreground/5 py-6 px-6 text-center text-xs text-foreground/30 mt-auto">
-        <p>© {new Date().getFullYear()} LivePapers. Powered by AI and intelligent learning pipelines.</p>
-      </footer>
+      {/* ── Mobile app switcher ── */}
+      {isMobile && showSwitcher && (
+        <div className="fixed inset-0 z-[200] bg-background/95 p-6 flex flex-col">
+          <p className="text-sm text-foreground/40 mb-4 text-center">Open apps</p>
+          <div className="grid grid-cols-2 gap-4 overflow-y-auto flex-1">
+            {windows.length === 0
+              ? <p className="col-span-2 text-center text-foreground/30 text-sm">No open apps</p>
+              : windows.map(w => (
+                  <button key={w.id} onClick={() => restoreWindow(w.id)}
+                    className="bg-surface-dim border border-foreground/10 rounded-xl p-4 text-left flex items-center gap-3">
+                    <Image src={w.iconSrc} alt={w.title} width={32} height={32} className="dark:invert" />
+                    <div>
+                      <p className="text-sm font-medium">{w.title}</p>
+                      <p className="text-xs text-foreground/40">{minimized.includes(w.id) ? 'Minimized' : 'Running'}</p>
+                    </div>
+                  </button>
+                ))
+            }
+          </div>
+          <button onClick={() => setShowSwitcher(false)} className="mt-6 text-sm text-foreground/40 text-center">Dismiss</button>
+        </div>
+      )}
     </div>
   );
 }
