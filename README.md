@@ -3,7 +3,7 @@
 Okay so this was originally gonna be a straight forward A level resource hub website but I thought that thats too generic
 so I'm taking a spin on the tradidtional formula by making it into a web os entered around A level resources
 
-project structure is as follows:
+# Project Structure
 
 app/api/:
 - next auth dynamic route
@@ -37,7 +37,7 @@ app/ (frontend for respective pages):
 - models/
     - User.js users collection model/schema
 
-#how auth works:
+# how auth works:
 User signup -> signup with google? -> if account doesnt exist we ask them to create one and link with google on creation -> push user to dashboard
 The next time the user logs in, they cans eamlessly login with google
 
