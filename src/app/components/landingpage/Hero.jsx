@@ -11,14 +11,14 @@ export default function Hero() {
   useGSAP(() => {
     const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-    // Floating orbs entrance
+
     tl.fromTo(
       '.hero-orb',
       { scale: 0, opacity: 0 },
       { scale: 1, opacity: 0.15, duration: 1.2, stagger: 0.2, ease: 'back.out(1.5)' }
     );
 
-    // Hero Content stagger
+
     tl.fromTo(
       '.hero-stagger',
       { y: 40, opacity: 0 },
@@ -26,7 +26,7 @@ export default function Hero() {
       '-=0.6'
     );
 
-    // Continuous floating animation for orbs
+
     gsap.utils.toArray('.hero-orb').forEach((orb, i) => {
       gsap.to(orb, {
         y: `random(-40, 40)`,
@@ -43,14 +43,14 @@ export default function Hero() {
   return (
     <section ref={containerRef} className="relative min-h-[100dvh] w-full flex flex-col items-center justify-center px-6 pt-20">
       
-      {/* Floating Orbs Background */}
+
       <div className="absolute inset-0 overflow-hidden pointer-events-none flex items-center justify-center">
         <div className="hero-orb absolute w-[30vw] h-[30vw] rounded-full bg-foreground blur-3xl opacity-0 translate-x-[-20%] translate-y-[-20%]" />
         <div className="hero-orb absolute w-[20vw] h-[20vw] rounded-full bg-foreground blur-3xl opacity-0 translate-x-[30%] translate-y-[20%]" />
         <div className="hero-orb absolute w-[15vw] h-[15vw] rounded-full bg-foreground blur-3xl opacity-0 translate-x-[-10%] translate-y-[40%]" />
       </div>
 
-      {/* Hero Content */}
+
       <div className="relative z-10 flex flex-col items-center text-center max-w-4xl w-full">
         <h1 className="hero-stagger text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 leading-[1.1] w-full opacity-0 translate-y-10">
           Master your exams with <span className="opacity-50">intelligent</span> past papers.

@@ -23,7 +23,7 @@ const FeatureCard = ({ title, description, className = '' }) => {
       onMouseLeave={() => setHovered(false)}
       className={`fade-up relative p-8 sm:p-10 rounded-2xl border border-foreground/10 bg-background overflow-hidden opacity-0 translate-y-8 group ${className}`}
     >
-      {/* Subtle background glow on hover */}
+ 
       <span
         className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-500 ease-out"
         style={{
@@ -31,7 +31,7 @@ const FeatureCard = ({ title, description, className = '' }) => {
           background: `radial-gradient(circle 400px at var(--x, 0px) var(--y, 0px), rgba(0,0,0,0.03), transparent 80%)`,
         }}
       />
-      {/* Dark mode glow support - this relies on CSS variable but we'll use a generic approach */}
+
       <span
         className="absolute inset-0 pointer-events-none z-0 transition-opacity duration-500 ease-out dark:hidden"
         style={{

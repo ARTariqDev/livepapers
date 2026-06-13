@@ -1,22 +1,30 @@
 import Image from 'next/image';
 
-const Icon = ({ src, alt, width = 52, height = 52, onClick, text }) => {
+const Icon = ({ src, alt, onClick, text }) => {
   return (
     <button
       onClick={onClick}
-      className="flex flex-col items-center gap-2 px-3 py-3 w-20 rounded-xl border-none bg-transparent cursor-pointer transition-colors duration-150 hover:bg-foreground/10 active:bg-foreground/15"
+      style={{ width: 'var(--icon-wrapper-width, 80px)' }}
+      className="flex flex-col items-center gap-2 px-3 py-3 rounded-xl border-none bg-transparent cursor-pointer transition-colors duration-150 hover:bg-foreground/10 active:bg-foreground/15"
     >
-      <div className="w-[52px] h-[52px] rounded-xl bg-surface-dim border border-foreground/20 flex items-center justify-center overflow-hidden">
+      <div
+        style={{ width: 'var(--icon-size, 52px)', height: 'var(--icon-size, 52px)' }}
+        className="rounded-xl bg-surface-dim border border-foreground/20 flex items-center justify-center overflow-hidden shrink-0"
+      >
         <Image
           src={src}
           alt={alt}
-          width={width}
-          height={height}
-          className="object-contain dark:invert"
+          width={52}
+          height={52}
+          className="object-contain dark:invert p-1"
+          style={{ width: '70%', height: '70%' }}
         />
       </div>
       {text && (
-        <span className="text-[11px] text-foreground/80 leading-tight text-center w-full break-words">
+        <span
+          style={{ fontSize: 'var(--icon-font-size, 11px)' }}
+          className="text-foreground/80 leading-tight text-center w-full break-words"
+        >
           {text}
         </span>
       )}

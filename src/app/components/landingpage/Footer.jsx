@@ -5,7 +5,7 @@ import Button from '../Button';
 export default function Footer() {
   return (
     <footer className="py-24 px-6 text-center border-t border-foreground/10 relative z-30 overflow-hidden">
-      {/* Subtle background glow */}
+
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center opacity-50">
         <div className="w-[50vw] h-[50vw] rounded-full bg-foreground blur-[100px] opacity-10 translate-y-1/2" />
       </div>

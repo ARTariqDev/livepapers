@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -21,7 +23,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light) {
     --background: #000000;
     --foreground: #ffffff;
     --accent: #ffffff;
@@ -29,6 +31,15 @@
     --surface: #000000;
     --surface-dim: #0a0a0a;
   }
+}
+
+:root.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  --accent: #ffffff;
+  --accent-foreground: #000000;
+  --surface: #000000;
+  --surface-dim: #0a0a0a;
 }
 
 body {

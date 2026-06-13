@@ -35,7 +35,7 @@ export default function Features() {
     <section ref={containerRef} id="features" className="relative z-10 bg-background py-24 sm:py-32">
       <div className="max-w-6xl mx-auto px-6 lg:px-8 space-y-32">
         
-        {/* Section 1: Core Practice */}
+
         <div className="animated-section">
           <div className="fade-up mb-12 max-w-2xl opacity-0 translate-y-8">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">Practice with purpose</h2>
@@ -60,7 +60,7 @@ export default function Features() {
           </div>
         </div>
 
-        {/* Section 2: AI */}
+
         <div className="animated-section">
           <div className="fade-up mb-12 max-w-2xl opacity-0 translate-y-8">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">AI that understands you</h2>
@@ -87,7 +87,7 @@ export default function Features() {
           </div>
         </div>
 
-        {/* Section 3: Progression */}
+
         <div className="animated-section">
           <div className="fade-up mb-12 max-w-2xl opacity-0 translate-y-8">
             <h2 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">Track every step forward</h2>

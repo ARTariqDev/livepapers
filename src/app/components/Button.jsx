@@ -59,7 +59,7 @@ const Button = ({
 
   const inner = (
     <>
-      {/* Glow Effect / Border Mask */}
+
       <span
         className="absolute inset-0 pointer-events-none rounded-md z-10 transition-opacity duration-300 ease-out"
         style={{
@@ -71,7 +71,7 @@ const Button = ({
         }}
       />
 
-      {/* Ripple Map */}
+
       {ripples.map((ripple) => (
         <span
           key={ripple.id}
@@ -87,7 +87,7 @@ const Button = ({
         />
       ))}
 
-      {/* Button Text */}
+
       <span className="relative z-20">
         {text}
       </span>
