@@ -52,7 +52,14 @@ app/ (frontend for respective pages):
 - models/
     - User.js users collection model/schema
 
-
+### Remaining Features and Known Issues
+- Add the ability to add "custom apps"  ans store Custom App Config in mongodb 
+- Mobile UI still a bit Buggy
+- Icons dont change theme correctly sometimes with dark/light mode I think it might be a state change/icons being .pngs issue
+- Still need the implement the Past Paper App (will use a scraper to scrape papcambrideg and pastpapers.co to find past papers for this)
+- Still need to implement the Live Mcq's App
+- Need to debloat since Web OS performance isn't ideal , especially because I used gsap for animations
+- Implementing a "Books" or resources app (basically will have pdf's of A level Books)
 
 
 ### Tech Stack:
