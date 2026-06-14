@@ -11,17 +11,16 @@ export default function AuthLayout({ children }) {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Entrance timeline
+
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-      // Brand panel slides in from left
+
       tl.fromTo(
         '.auth-brand-panel',
         { x: '-100%', opacity: 0 },
         { x: '0%', opacity: 1, duration: 1 }
       );
 
-      // Floating orbs fade in
       tl.fromTo(
         '.auth-orb',
         { scale: 0, opacity: 0 },
@@ -29,7 +28,7 @@ export default function AuthLayout({ children }) {
         '-=0.5'
       );
 
-      // Brand text staggers in
+
       tl.fromTo(
         '.brand-text-line',
         { y: 60, opacity: 0 },
@@ -37,7 +36,7 @@ export default function AuthLayout({ children }) {
         '-=0.6'
       );
 
-      // Form panel fades in from right
+
       tl.fromTo(
         '.auth-form-panel',
         { x: '40px', opacity: 0 },
@@ -45,7 +44,7 @@ export default function AuthLayout({ children }) {
         '-=0.5'
       );
 
-      // Continuous floating animation for orbs
+
       gsap.utils.toArray('.auth-orb').forEach((orb, i) => {
         gsap.to(orb, {
           y: `random(-30, 30)`,
@@ -64,15 +63,15 @@ export default function AuthLayout({ children }) {
 
   return (
     <div ref={containerRef} className="min-h-[100dvh] flex bg-background text-foreground font-sans">
-      {/* Left Brand Panel */}
+
       <div className="auth-brand-panel hidden lg:flex lg:w-[45%] xl:w-[50%] relative overflow-hidden flex-col justify-between p-12 bg-foreground text-background">
-        {/* Floating orbs */}
+
         <div className="auth-orb absolute top-[15%] left-[20%] w-64 h-64 rounded-full bg-background" />
         <div className="auth-orb absolute top-[55%] right-[10%] w-48 h-48 rounded-full bg-background" />
         <div className="auth-orb absolute bottom-[10%] left-[40%] w-32 h-32 rounded-full bg-background" />
         <div className="auth-orb absolute top-[35%] left-[60%] w-20 h-20 rounded-full bg-background" />
 
-        {/* Brand Content */}
+
         <div className="relative z-10">
           <Link href="/" className="brand-text-line block text-2xl font-bold tracking-tight hover:opacity-80 transition-opacity">
             LivePapers.
@@ -95,16 +94,15 @@ export default function AuthLayout({ children }) {
         </div>
       </div>
 
-      {/* Right Form Panel */}
       <div ref={formRef} className="auth-form-panel flex-1 flex flex-col min-h-[100dvh]">
-        {/* Mobile header */}
+
         <div className="lg:hidden flex items-center justify-between px-6 py-5 border-b border-foreground/5">
           <Link href="/" className="text-xl font-bold tracking-tight">
             LivePapers.
           </Link>
         </div>
 
-        {/* Form content */}
+
         <div className="flex-1 flex items-center justify-center px-6 py-12">
           <div className="w-full max-w-[420px]">
             {children}

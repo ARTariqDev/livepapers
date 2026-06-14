@@ -45,5 +45,5 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Prevent re-compilation of model in Next.js
+
 export default mongoose.models.User || mongoose.model('User', UserSchema);

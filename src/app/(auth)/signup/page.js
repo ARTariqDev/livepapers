@@ -43,7 +43,7 @@ export default function SignupPage() {
     }
   }, []);
 
-  // Calculate password strength
+
   useEffect(() => {
     let strength = 0;
     if (password.length >= 8) strength++;
@@ -60,7 +60,6 @@ export default function SignupPage() {
         delay: 0.4,
       });
 
-      // Title and subtitle
       tl.fromTo(
         '.auth-title',
         { y: 30, opacity: 0 },
@@ -73,7 +72,7 @@ export default function SignupPage() {
         '-=0.3'
       );
 
-      // Social buttons
+
       tl.fromTo(
         '.social-btn',
         { y: 20, opacity: 0, scale: 0.95 },
@@ -81,7 +80,6 @@ export default function SignupPage() {
         '-=0.2'
       );
 
-      // Divider
       tl.fromTo(
         '.auth-divider',
         { scaleX: 0, opacity: 0 },
@@ -89,7 +87,7 @@ export default function SignupPage() {
         '-=0.2'
       );
 
-      // Form fields stagger
+  
       tl.fromTo(
         '.form-field',
         { y: 20, opacity: 0 },
@@ -97,7 +95,7 @@ export default function SignupPage() {
         '-=0.3'
       );
 
-      // Submit button
+
       tl.fromTo(
         '.submit-btn',
         { y: 15, opacity: 0 },
@@ -105,7 +103,7 @@ export default function SignupPage() {
         '-=0.15'
       );
 
-      // Footer
+    
       tl.fromTo(
         '.auth-footer',
         { y: 10, opacity: 0 },
@@ -133,7 +131,7 @@ export default function SignupPage() {
     }
   }, [passwordStrength, password.length, showLinkPrompt]);
 
-  // Animate link prompt entrance
+
   useEffect(() => {
     if (showLinkPrompt) {
       gsap.fromTo(
@@ -209,7 +207,7 @@ export default function SignupPage() {
 
       if (res.ok) {
         if (googleEmail) {
-          // If we came from a Google-linking redirect, it's already linked in the DB!
+          // If we came from a Google-linking redirect, it's already linked in the DB
           // Log in with credentials and redirect directly to dashboard
           const signInRes = await signIn('credentials', {
             redirect: false,
@@ -224,7 +222,7 @@ export default function SignupPage() {
             router.refresh();
           }
         } else {
-          // Animate out signup form fields and trigger prompt
+
           gsap.to(
             ['.auth-title', '.auth-subtitle', '.social-btn', '.auth-divider', '.form-field', '.submit-btn', '.auth-footer'],
             {
@@ -312,8 +310,8 @@ export default function SignupPage() {
             Start mastering your exams today — completely free
           </p>
 
-          {/* Social Login */}
-          {/* Social Login — hidden when user is completing Google-linked registration */}
+
+          {/* Social Login thats hidden when user is completing Google-linked registration */}
           {!googleEmail && (
             <>
               <div className="mb-6">
@@ -332,7 +330,7 @@ export default function SignupPage() {
                 </button>
               </div>
 
-              {/* Divider */}
+
               <div className="auth-divider flex items-center gap-4 mb-6 origin-center">
                 <div className="flex-1 h-px bg-foreground/10" />
                 <span className="text-xs text-foreground/30 font-medium uppercase tracking-widest">or</span>
@@ -341,7 +339,6 @@ export default function SignupPage() {
             </>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {googleEmail && (
               <div className="p-3 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/[0.04] rounded-lg border border-emerald-500/15 flex items-center gap-2">
@@ -471,7 +468,7 @@ export default function SignupPage() {
                 </button>
               </div>
 
-              {/* Password Strength Indicator */}
+
               {password.length > 0 && (
                 <div className="mt-2.5 space-y-1.5">
                   <div className="flex gap-1 h-1 rounded-full overflow-hidden bg-foreground/5">

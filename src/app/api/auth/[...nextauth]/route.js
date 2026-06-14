@@ -102,7 +102,7 @@ export const authOptions = {
           return false;
         }
       }
-      return true; // Continue with credentials sign in
+      return true; 
     },
     async jwt({ token, user, account }) {
       if (account && account.provider === 'google') {

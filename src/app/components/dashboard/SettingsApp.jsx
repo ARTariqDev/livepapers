@@ -15,7 +15,7 @@ export default function SettingsApp() {
 
   // Load configuration on mount
   useEffect(() => {
-    // Fetch linkage info
+
     fetch('/api/user/settings')
       .then((res) => {
         if (res.ok) return res.json();
@@ -166,7 +166,7 @@ export default function SettingsApp() {
 
   return (
     <div className="p-6 overflow-y-auto h-full text-foreground max-w-lg mx-auto space-y-8 select-none scrollbar-none">
-      {/* Messages */}
+
       {message && (
         <div className="p-3 text-xs bg-green-500/10 border border-green-500/20 text-green-500 rounded-lg animate-fade-in">
           {message}
@@ -178,7 +178,7 @@ export default function SettingsApp() {
         </div>
       )}
 
-      {/* Profile & Logout */}
+
       <section className="flex items-center justify-between border-b border-foreground/5 pb-4">
         <div>
           <h2 className="text-sm font-semibold tracking-wide">System Settings</h2>
@@ -192,7 +192,7 @@ export default function SettingsApp() {
         </button>
       </section>
 
-      {/* Theme selector */}
+
       <section className="space-y-2">
         <label className="text-[11px] font-medium text-foreground/50 tracking-wider uppercase">Appearance Theme</label>
         <div className="grid grid-cols-3 gap-2 bg-surface-dim p-1.5 rounded-xl border border-foreground/5">
@@ -212,9 +212,9 @@ export default function SettingsApp() {
         </div>
       </section>
 
-      {/* Customizations */}
+
       <section className="grid grid-cols-2 gap-4">
-        {/* App Icon Size */}
+
         <div className="space-y-2">
           <label className="text-[11px] font-medium text-foreground/50 tracking-wider uppercase">App Icon Size</label>
           <div className="flex bg-surface-dim p-1 rounded-xl border border-foreground/5 justify-between">
@@ -234,7 +234,7 @@ export default function SettingsApp() {
           </div>
         </div>
 
-        {/* App Font Size */}
+
         <div className="space-y-2">
           <label className="text-[11px] font-medium text-foreground/50 tracking-wider uppercase">App Font Size</label>
           <div className="flex bg-surface-dim p-1 rounded-xl border border-foreground/5 justify-between">
@@ -255,11 +255,11 @@ export default function SettingsApp() {
         </div>
       </section>
 
-      {/* Advanced Accounts */}
+
       <section className="space-y-4 border-t border-foreground/5 pt-6">
         <label className="text-[11px] font-medium text-foreground/50 tracking-wider uppercase block">Account Integration</label>
         
-        {/* Google linkage */}
+
         <div className="flex items-center justify-between bg-surface-dim border border-foreground/5 p-4 rounded-2xl">
           <div>
             <h4 className="text-xs font-semibold">Google Account Connection</h4>
@@ -280,7 +280,7 @@ export default function SettingsApp() {
           )}
         </div>
 
-        {/* Account Deletion */}
+
         <div className="flex items-center justify-between border border-red-500/10 bg-red-500/[0.02] p-4 rounded-2xl">
           <div>
             <h4 className="text-xs font-semibold text-red-500">Delete Account</h4>

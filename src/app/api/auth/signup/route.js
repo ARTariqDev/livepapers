@@ -17,7 +17,6 @@ export async function POST(req) {
 
     await connectDB();
 
-    // Check if user already exists
     const emailExists = await User.findOne({ email });
 
     if (emailExists) {
@@ -36,7 +35,7 @@ export async function POST(req) {
       );
     }
 
-    // Hash password
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -61,7 +60,7 @@ export async function POST(req) {
       userData.linkTokenExpires = linkTokenExpires;
     }
 
-    // Create user
+
     const user = await User.create(userData);
 
     const response = NextResponse.json(
