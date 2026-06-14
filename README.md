@@ -75,6 +75,7 @@ app/ (frontend for respective pages):
 AI was used to:
 - debug
 - write complex code (especially backend/auth)
+  
 It was NOT used to:
 - write the readme
 - come up with new features/ideas (Although I do acknowldge it did come up with better UI designs then what I intially had planned)
